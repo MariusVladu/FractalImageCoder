@@ -38,11 +38,20 @@
             this.xDLabel = new System.Windows.Forms.Label();
             this.yDLabel = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.saveButton = new System.Windows.Forms.Button();
             this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.decodedImagePanel = new System.Windows.Forms.Panel();
+            this.loadEncodedButton = new System.Windows.Forms.Button();
+            this.loadInitialButton = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.steps = new System.Windows.Forms.NumericUpDown();
+            this.decodeButton = new System.Windows.Forms.Button();
+            this.savedDecodedButton = new System.Windows.Forms.Button();
+            this.PSNRLabel = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.steps)).BeginInit();
             this.SuspendLayout();
             // 
             // originalImagePanel
@@ -141,15 +150,6 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Matching Blocks";
             // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 19);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(77, 13);
-            this.label1.TabIndex = 10;
-            this.label1.Text = "Range 80 x 80";
-            // 
             // label2
             // 
             this.label2.AutoSize = true;
@@ -158,6 +158,15 @@
             this.label2.Size = new System.Drawing.Size(93, 13);
             this.label2.TabIndex = 11;
             this.label2.Text = "Domain 160 x 160";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 19);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(77, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "Range 80 x 80";
             // 
             // saveButton
             // 
@@ -177,11 +186,109 @@
             this.progressBar.Size = new System.Drawing.Size(512, 23);
             this.progressBar.TabIndex = 11;
             // 
+            // decodedImagePanel
+            // 
+            this.decodedImagePanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.decodedImagePanel.Location = new System.Drawing.Point(588, 12);
+            this.decodedImagePanel.Name = "decodedImagePanel";
+            this.decodedImagePanel.Size = new System.Drawing.Size(512, 512);
+            this.decodedImagePanel.TabIndex = 1;
+            // 
+            // loadEncodedButton
+            // 
+            this.loadEncodedButton.Location = new System.Drawing.Point(1025, 559);
+            this.loadEncodedButton.Name = "loadEncodedButton";
+            this.loadEncodedButton.Size = new System.Drawing.Size(75, 23);
+            this.loadEncodedButton.TabIndex = 12;
+            this.loadEncodedButton.Text = "Load";
+            this.loadEncodedButton.UseVisualStyleBackColor = true;
+            this.loadEncodedButton.Click += new System.EventHandler(this.loadEncodedButton_Click);
+            // 
+            // loadInitialButton
+            // 
+            this.loadInitialButton.Enabled = false;
+            this.loadInitialButton.Location = new System.Drawing.Point(1026, 588);
+            this.loadInitialButton.Name = "loadInitialButton";
+            this.loadInitialButton.Size = new System.Drawing.Size(75, 23);
+            this.loadInitialButton.TabIndex = 13;
+            this.loadInitialButton.Text = "Load Initial";
+            this.loadInitialButton.UseVisualStyleBackColor = true;
+            this.loadInitialButton.Click += new System.EventHandler(this.loadInitialButton_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(965, 648);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(54, 13);
+            this.label3.TabIndex = 12;
+            this.label3.Text = "# of steps";
+            // 
+            // steps
+            // 
+            this.steps.Location = new System.Drawing.Point(1025, 646);
+            this.steps.Maximum = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.steps.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.steps.Name = "steps";
+            this.steps.Size = new System.Drawing.Size(75, 20);
+            this.steps.TabIndex = 14;
+            this.steps.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // decodeButton
+            // 
+            this.decodeButton.Enabled = false;
+            this.decodeButton.Location = new System.Drawing.Point(1025, 617);
+            this.decodeButton.Name = "decodeButton";
+            this.decodeButton.Size = new System.Drawing.Size(75, 23);
+            this.decodeButton.TabIndex = 15;
+            this.decodeButton.Text = "Decode";
+            this.decodeButton.UseVisualStyleBackColor = true;
+            this.decodeButton.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // savedDecodedButton
+            // 
+            this.savedDecodedButton.Enabled = false;
+            this.savedDecodedButton.Location = new System.Drawing.Point(1026, 672);
+            this.savedDecodedButton.Name = "savedDecodedButton";
+            this.savedDecodedButton.Size = new System.Drawing.Size(75, 23);
+            this.savedDecodedButton.TabIndex = 16;
+            this.savedDecodedButton.Text = "Save";
+            this.savedDecodedButton.UseVisualStyleBackColor = true;
+            // 
+            // PSNRLabel
+            // 
+            this.PSNRLabel.AutoSize = true;
+            this.PSNRLabel.Location = new System.Drawing.Point(1023, 741);
+            this.PSNRLabel.Name = "PSNRLabel";
+            this.PSNRLabel.Size = new System.Drawing.Size(49, 13);
+            this.PSNRLabel.TabIndex = 17;
+            this.PSNRLabel.Text = "PSNR = ";
+            // 
             // UI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(822, 809);
+            this.ClientSize = new System.Drawing.Size(1283, 809);
+            this.Controls.Add(this.PSNRLabel);
+            this.Controls.Add(this.savedDecodedButton);
+            this.Controls.Add(this.decodeButton);
+            this.Controls.Add(this.steps);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.loadInitialButton);
+            this.Controls.Add(this.loadEncodedButton);
+            this.Controls.Add(this.decodedImagePanel);
             this.Controls.Add(this.progressBar);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.groupBox1);
@@ -191,7 +298,9 @@
             this.Text = "Fractal Image Coder";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.steps)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -211,6 +320,14 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.ProgressBar progressBar;
+        private System.Windows.Forms.Panel decodedImagePanel;
+        private System.Windows.Forms.Button loadEncodedButton;
+        private System.Windows.Forms.Button loadInitialButton;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.NumericUpDown steps;
+        private System.Windows.Forms.Button decodeButton;
+        private System.Windows.Forms.Button savedDecodedButton;
+        private System.Windows.Forms.Label PSNRLabel;
     }
 }
 

@@ -5,7 +5,7 @@
         public Block Range { get; set; }
         public Block Domain { get; set; }
         public int Isometry { get; set; }
-        public int Scale { get; set; }
-        public int Offset { get; set; }
+        public double Scale { get; set; }
+        public double Offset { get; set; }
     }
 }

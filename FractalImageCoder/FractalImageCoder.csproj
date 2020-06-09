@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Coder.cs" />
+    <Compile Include="Decoder.cs" />
     <Compile Include="Entities\Block.cs" />
     <Compile Include="Entities\MatchingBlocks.cs" />
     <Compile Include="Isometries.cs" />

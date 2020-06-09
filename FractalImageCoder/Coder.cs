@@ -10,8 +10,8 @@ namespace FractalImageCoder
 {
     public class Coder
     {
-        private int height;
-        private int width;
+        public int height;
+        public int width;
         public int[,] imageMatrix;
 
         private IBitWriter bitWriter;
@@ -19,6 +19,7 @@ namespace FractalImageCoder
 
         public void CodeToFile(string inputFilePath, string outputFilePath, Action<int> onProgress)
         {
+            string fullString = "";
             InitializeImageMatrix(new Bitmap(inputFilePath));
             InitializeOutputFile(inputFilePath, outputFilePath);
 
@@ -54,10 +55,13 @@ namespace FractalImageCoder
                     }
                 }
 
+                fullString += $"{bestDomain.StartX} {bestDomain.StartY} {bestIsometry} {bestScale} {bestOffset};";
                 WriteBestDomainMatchParameters(bestDomain, bestIsometry, bestScale, bestOffset);
 
                 onProgress(++processedRanges);
             }
+
+            File.WriteAllText("stringOutput.txt", fullString);
         }
 
         public MatchingBlocks GetBestMatchingDomainBlock(int x, int y, Bitmap image)
@@ -137,14 +141,12 @@ namespace FractalImageCoder
                     bitWriter.WriteNBits(8, bitReader.ReadNBits(8));
                 }
             }
-
-            bitWriter.WriteNBits(32, (uint)bitsForCoordinates);
         }
 
         private void WriteBestDomainMatchParameters(Block bestDomain, int bestIsometry, int bestScale, int bestOffset)
         {
-            bitWriter.WriteNBits(bitsForCoordinates, (uint)bestDomain.StartX);
-            bitWriter.WriteNBits(bitsForCoordinates, (uint)bestDomain.StartY);
+            bitWriter.WriteNBits(bitsForCoordinates, (uint)bestDomain.StartX / 8);
+            bitWriter.WriteNBits(bitsForCoordinates, (uint)bestDomain.StartY / 8);
             bitWriter.WriteNBits(3, (uint)bestIsometry);
             bitWriter.WriteNBits(5, (uint)bestScale);
             bitWriter.WriteNBits(7, (uint)bestOffset);

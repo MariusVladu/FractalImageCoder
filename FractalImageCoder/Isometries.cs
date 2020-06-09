@@ -19,7 +19,7 @@ namespace FractalImageCoder
             return rdSum;
         }
 
-        private static int GetDomainValue(int i, int j, int isometryIndex, Block domain, int[,] imageMatrix)
+        public static int GetDomainValue(int i, int j, int isometryIndex, Block domain, int[,] imageMatrix)
         {
             ComputeBlockCoordinatesByIsometry(i, j, isometryIndex, out var blockComputedI, out var blockComputedJ);
             i = domain.StartX + blockComputedI * 2;

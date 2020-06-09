@@ -36,7 +36,7 @@ namespace FractalImageCoder
             if (scale >= (1 << s_bits)) scale = (1 << s_bits) - 1;
 
             /* Now recompute alpha back */
-            alpha = (double)scale / (double)(1 << s_bits) * (2.0 * max_scale) - max_scale;
+            alpha = DequantizeScale(scale);
 
             /* compute the offset */
             beta = (rsum - alpha * dsum) / sum1;
@@ -50,14 +50,24 @@ namespace FractalImageCoder
             if (offset >= (1 << o_bits)) offset = (1 << o_bits) - 1;
 
             /* Recompute beta from the integer */
-            beta = (double)offset / (double)((1 << o_bits) - 1) * ((1.0 + Math.Abs(alpha)) * GREY_LEVELS);
-            if (alpha > 0.0)
-                beta -= alpha * GREY_LEVELS;
+            beta = DequantizeOffset(offset, alpha);
 
             /* Compute the sqerr based on the quantized alpha and beta! */
-            error = (rsum2 + alpha * (alpha * dsum2 - 2.0 * rdsum + 2.0 * beta * dsum) +
-                        beta * (beta * sum1 - 2.0 * rsum));
+            error = (rsum2 + alpha * (alpha * dsum2 - 2.0 * rdsum + 2.0 * beta * dsum) + beta * (beta * sum1 - 2.0 * rsum));
+        }
 
+        public static double DequantizeScale(int scale)
+        {
+            return (double)scale / (1 << s_bits) * (2.0 * max_scale) - max_scale;
+        }
+
+        public static double DequantizeOffset(int offset, double dequantizedScale)
+        {
+            var beta = (double)offset / (double)((1 << o_bits) - 1) * ((1.0 + Math.Abs(dequantizedScale)) * GREY_LEVELS);
+            if (dequantizedScale > 0.0)
+                beta -= dequantizedScale * GREY_LEVELS;
+
+            return beta;
         }
     }
 }

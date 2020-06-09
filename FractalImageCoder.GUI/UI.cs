@@ -9,10 +9,13 @@ namespace FractalImageCoder.GUI
         private string originalImagePath;
         private Bitmap originalBitmap;
 
+        private string fractalEncodedImagePath;
+
         private Graphics graphics;
         private Pen pen = new Pen(Color.White);
 
         private Coder coder = new Coder();
+        private Decoder decoder;
 
         public UI()
         {
@@ -41,11 +44,14 @@ namespace FractalImageCoder.GUI
 
             var matchingBlocks = coder.GetBestMatchingDomainBlock(x1, y1, originalBitmap);
 
+            var dequantizedScale = RangeDomainRelation.DequantizeScale((int)matchingBlocks.Scale);
+            var dequantizedOffset = RangeDomainRelation.DequantizeOffset((int)matchingBlocks.Offset, dequantizedScale);
+
             xDLabel.Text = "Xd = " + matchingBlocks.Domain.StartX;
             yDLabel.Text = "Yd = " + matchingBlocks.Domain.StartY;
             isometryLabel.Text = "Isometry = " + matchingBlocks.Isometry;
-            scaleLabel.Text = "Scale = " + matchingBlocks.Scale;
-            offsetLabel.Text = "Offset = " + matchingBlocks.Offset;
+            scaleLabel.Text = "Scale = " + Math.Round(dequantizedScale, 2);
+            offsetLabel.Text = "Offset = " + Math.Round(dequantizedOffset, 2);
 
             var rangeImage = new Bitmap(80, 80);
             var domainImage = new Bitmap(160, 160);
@@ -97,6 +103,62 @@ namespace FractalImageCoder.GUI
         private void UpdateProgressBar(int value)
         {
             progressBar.Value = value;
+        }
+
+        private void loadEncodedButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Filter = "Fractal Encoded Image|*.f";
+            if (fileDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            fractalEncodedImagePath = fileDialog.FileName;
+
+            loadInitialButton.Enabled = true;
+            decodeButton.Enabled = true;
+            savedDecodedButton.Enabled = true;
+        }
+
+        private void loadInitialButton_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Filter = "Bitmap Image|*.bmp";
+            if (fileDialog.ShowDialog() != DialogResult.OK)
+                return;
+
+            originalImagePath = fileDialog.FileName;
+            originalBitmap = new Bitmap(originalImagePath);
+
+            this.originalImagePanel.BackgroundImage = originalBitmap;
+
+            decoder = new Decoder(fractalEncodedImagePath, originalImagePath);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < steps.Value; i++)
+            {
+                DecodeImageOneStep();
+            }
+        }
+
+        private void DecodeImageOneStep()
+        {
+            var decodedImageMatrix = decoder.Decode(UpdateProgressBar);
+            var decodedImage = new Bitmap(decoder.width, decoder.height);
+
+            for (int i = 0; i < decodedImage.Height; i++)
+            {
+                for (int j = 0; j < decodedImage.Width; j++)
+                {
+                    var intensity = decodedImageMatrix[i, j];
+
+                    decodedImage.SetPixel(i, j, Color.FromArgb(intensity, intensity, intensity));
+                }
+            }
+
+            decodedImagePanel.BackgroundImage = decodedImage;
+            this.Refresh();
         }
     }
 }
