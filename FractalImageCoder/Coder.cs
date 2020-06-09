@@ -17,13 +17,15 @@ namespace FractalImageCoder
         private IBitWriter bitWriter;
         private int bitsForCoordinates;
 
-        public void CodeToFile(string inputFilePath, string outputFilePath)
+        public void CodeToFile(string inputFilePath, string outputFilePath, Action<int> onProgress)
         {
             InitializeImageMatrix(new Bitmap(inputFilePath));
             InitializeOutputFile(inputFilePath, outputFilePath);
 
             var ranges = ComputeRanges();
             var domains = ComputeDomains();
+
+            var processedRanges = 0;
 
             foreach (var range in ranges)
             {
@@ -53,16 +55,35 @@ namespace FractalImageCoder
                 }
 
                 WriteBestDomainMatchParameters(bestDomain, bestIsometry, bestScale, bestOffset);
+
+                onProgress(++processedRanges);
             }
         }
 
-        public Block GetBestMatchingDomainBlock(int x, int y, Bitmap image)
+        public MatchingBlocks GetBestMatchingDomainBlock(int x, int y, Bitmap image)
         {
             InitializeImageMatrix(image);
-            var range = ComputeBlock(x / 8 * 8, y / 8 * 8, 8);
 
+            var range = ComputeBlock(x / 8 * 8, y / 8 * 8, 8);
+            var domain = GetBestMatchingDomainBlockForRange(range, out var isometry, out var scale, out var offset);
+
+            return new MatchingBlocks
+            {
+                Range = range,
+                Domain = domain,
+                Isometry = isometry,
+                Scale = scale,
+                Offset = offset
+            };
+        }
+
+        public Block GetBestMatchingDomainBlockForRange(Block range, out int bestIsometry, out int bestScale, out int bestOffset)
+        {
             Block bestDomain = null;
-            double minimumError = double.MaxValue;
+            bestIsometry = 0;
+            bestScale = 0;
+            bestOffset = 0;
+            double minimumError = int.MaxValue;
 
             foreach (var domain in ComputeDomains())
             {
@@ -75,6 +96,9 @@ namespace FractalImageCoder
                     if (error < minimumError)
                     {
                         bestDomain = domain;
+                        bestIsometry = isometryIndex;
+                        bestScale = scale;
+                        bestOffset = offset;
                         minimumError = error;
                     }
                 }
@@ -179,8 +203,9 @@ namespace FractalImageCoder
             for (int i = 0; i < blockSize; i++)
                 for (int j = 0; j < blockSize; j++)
                 {
-                    sum += imageMatrix[i, j];
-                    sumOfSquares += imageMatrix[i, j] * imageMatrix[i, j];
+                    var value = imageMatrix[x + i, y + j];
+                    sum += value;
+                    sumOfSquares += value * value;
                 }
 
             return new Block
@@ -192,7 +217,5 @@ namespace FractalImageCoder
                 SumOfSquares = sumOfSquares
             };
         }
-
-
     }
 }

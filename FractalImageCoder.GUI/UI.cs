@@ -10,7 +10,7 @@ namespace FractalImageCoder.GUI
         private Bitmap originalBitmap;
 
         private Graphics graphics;
-        private Pen pen = new Pen(Color.Black);
+        private Pen pen = new Pen(Color.White);
 
         private Coder coder = new Coder();
 
@@ -39,87 +39,64 @@ namespace FractalImageCoder.GUI
             var x1 = e.Location.X;
             var y1 = e.Location.Y;
 
-            var matchingDomain = coder.GetBestMatchingDomainBlock(x1, y1, originalBitmap);
+            var matchingBlocks = coder.GetBestMatchingDomainBlock(x1, y1, originalBitmap);
 
-            graphics.DrawRectangle(pen, x1 / 8 * 8, y1 / 8 * 8, 8, 8);
-            graphics.DrawRectangle(pen, matchingDomain.StartX, matchingDomain.StartY, 16, 16);
+            xDLabel.Text = "Xd = " + matchingBlocks.Domain.StartX;
+            yDLabel.Text = "Yd = " + matchingBlocks.Domain.StartY;
+            isometryLabel.Text = "Isometry = " + matchingBlocks.Isometry;
+            scaleLabel.Text = "Scale = " + matchingBlocks.Scale;
+            offsetLabel.Text = "Offset = " + matchingBlocks.Offset;
 
-            var imageMatrix = coder.imageMatrix;
-            var image = new Bitmap(512, 512);
+            var rangeImage = new Bitmap(80, 80);
+            var domainImage = new Bitmap(160, 160);
 
-            for (int i = 0; i < 62; i++)
+            for (int i = 0; i < 8; i++)
             {
-                for (int j = 0; j < 62; j++)
+                for (int j = 0; j < 8; j++)
                 {
-                    for (int t = 0; t < 8; t++)
-                        for (int v = 0; v < 8; v++)
+                    var intensity = coder.imageMatrix[matchingBlocks.Range.StartX + i, matchingBlocks.Range.StartY + j];
+                    for (int t = 0; t < 10; t++)
+                    {
+                        for (int v = 0; v < 10; v++)
                         {
-                            Isometries.ComputeBlockCoordinatesByIsometry(t, v, 7, out var x, out var y);
-
-                            x = i * 8 + x * 2;
-                            y = j * 8 + y * 2;
-
-                            var downsampledValue = (imageMatrix[x, y] + imageMatrix[x, y + 1] + imageMatrix[x + 1, y] + imageMatrix[x + 1, y + 1]) / 4;
-                            image.SetPixel(i * 8 + t * 2, j * 8 + v * 2, Color.FromArgb(downsampledValue, downsampledValue, downsampledValue));
-                            image.SetPixel(i * 8 + t * 2, j * 8 + v * 2 + 1, Color.FromArgb(downsampledValue, downsampledValue, downsampledValue));
-                            image.SetPixel(i * 8 + t * 2 + 1, j * 8 + v * 2, Color.FromArgb(downsampledValue, downsampledValue, downsampledValue));
-                            image.SetPixel(i * 8 + t * 2 + 1, j * 8 + v * 2 + 1, Color.FromArgb(downsampledValue, downsampledValue, downsampledValue));
+                            rangeImage.SetPixel(i * 10 + t, j * 10 + v, Color.FromArgb(intensity, intensity, intensity));
                         }
+                    }
                 }
             }
 
-            //for (int i = 0; i < 63; i++)
-            //{
-            //    for (int j = 0; j < 63; j++)
-            //    {
-            //        for (int t = 0; t < 8; t++)
-            //            for (int v = 0; v < 8; v++)
-            //            {
-            //                Isometries.ComputeBlockCoordinatesByIsometry(t, v, 2, out var x, out var y);
+            for (int i = 0; i < 16; i++)
+            {
+                for (int j = 0; j < 16; j++)
+                {
+                    var intensity = coder.imageMatrix[matchingBlocks.Domain.StartX + i, matchingBlocks.Domain.StartY + j];
+                    for (int t = 0; t < 10; t++)
+                    {
+                        for (int v = 0; v < 10; v++)
+                        {
+                            domainImage.SetPixel(i * 10 + t, j * 10 + v, Color.FromArgb(intensity, intensity, intensity));
+                        }
+                    }
+                }
+            }
 
-            //                x = i * 8 + x;
-            //                y = j * 8 + y;
+            rangeBlockPanel.BackgroundImage = rangeImage;
+            domainBlockPanel.BackgroundImage = domainImage;
 
-            //                var downsampledValue = imageMatrix[x, y];
-            //                image.SetPixel(i * 8 + t, j * 8 + v, Color.FromArgb(downsampledValue, downsampledValue, downsampledValue));
-            //            }
-            //    }
-            //}
+            originalImagePanel.Refresh();
 
-            //originalImagePanel.BackgroundImage = image;
+            graphics.DrawRectangle(pen, matchingBlocks.Range.StartX, matchingBlocks.Range.StartY, 8, 8);
+            graphics.DrawRectangle(pen, matchingBlocks.Domain.StartX, matchingBlocks.Domain.StartY, 16, 16);
+        }
 
-            //var imageMatrix = new int[8, 8];
-            //for (int i = 0; i < 8; i++)
-            //{
-            //    for (int j = 0; j < 8; j++)
-            //    {
-            //        //for (int t = 0; t < 64; t++)
-            //        //    for (int v = 0; v < 64; v++)
-            //        //    {
-            //        //        imageMatrix[i, j] += originalBitmap.GetPixel(i * 64 + t, j * 64 + v).R;
-            //        //    }
-            //        imageMatrix[i, j] += (originalBitmap.GetPixel(i, j).R + originalBitmap.GetPixel(i, j).G + originalBitmap.GetPixel(i, j).B)/3;
-            //    }
-            //}
+        private void saveButton_Click(object sender, EventArgs e)
+        {
+            coder.CodeToFile(originalImagePath, $"{originalImagePath}.f", UpdateProgressBar);
+        }
 
-            //var image = new Bitmap(512, 512);
-
-            //for (int i = 0; i < 8; i++)
-            //{
-            //    for (int j = 0; j < 8; j++)
-            //    {
-            //        Isometries.ComputeBlockCoordinatesByIsometry(i, j, 7, out var x, out var y);
-
-            //        for (int t = 0; t < 64; t++)
-            //            for (int v = 0; v < 64; v++)
-            //        {
-            //            image.SetPixel(i*64+t, j*64+v, Color.FromArgb(imageMatrix[x, y], imageMatrix[x, y], imageMatrix[x, y]));
-
-            //        }
-            //    }
-            //}
-
-            originalImagePanel.BackgroundImage = image;
+        private void UpdateProgressBar(int value)
+        {
+            progressBar.Value = value;
         }
     }
 }
