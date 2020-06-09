@@ -22,7 +22,7 @@ namespace FractalImageCoder
             double beta;
 
             /* compute the determinant */
-            var det = sum1 * dsum2 - dsum * dsum;
+            double det = sum1 * dsum2 - dsum * dsum;
 
             /* compute the scale */
             if (det == 0.0)
@@ -36,7 +36,7 @@ namespace FractalImageCoder
             if (scale >= (1 << s_bits)) scale = (1 << s_bits) - 1;
 
             /* Now recompute alpha back */
-            alpha = scale / (1 << s_bits) * (2.0 * max_scale) - max_scale;
+            alpha = (double)scale / (double)(1 << s_bits) * (2.0 * max_scale) - max_scale;
 
             /* compute the offset */
             beta = (rsum - alpha * dsum) / sum1;
@@ -50,12 +50,14 @@ namespace FractalImageCoder
             if (offset >= (1 << o_bits)) offset = (1 << o_bits) - 1;
 
             /* Recompute beta from the integer */
-            beta = offset / ((1 << o_bits) - 1) * ((1.0 + Math.Abs(alpha)) * GREY_LEVELS);
+            beta = (double)offset / (double)((1 << o_bits) - 1) * ((1.0 + Math.Abs(alpha)) * GREY_LEVELS);
             if (alpha > 0.0)
                 beta -= alpha * GREY_LEVELS;
 
             /* Compute the sqerr based on the quantized alpha and beta! */
-            error = rsum2 + alpha * (alpha * dsum2 - 2.0 * rdsum + 2.0 * beta * dsum) + beta * (beta * sum1 - 2.0 * rsum);
+            error = (rsum2 + alpha * (alpha * dsum2 - 2.0 * rdsum + 2.0 * beta * dsum) +
+                        beta * (beta * sum1 - 2.0 * rsum));
+
         }
     }
 }

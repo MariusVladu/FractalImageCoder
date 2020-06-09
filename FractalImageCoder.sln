@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D9E3DDAC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FractalImageCoder.UnitTests", "Tests\FractalImageCoder.UnitTests\FractalImageCoder.UnitTests.csproj", "{5960B623-81B9-4EE2-80D2-C3A152EC25DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FractalImageCoder.GUI", "FractalImageCoder.GUI\FractalImageCoder.GUI.csproj", "{73714097-09A5-43A0-AEA2-31A7E55C8BC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{5960B623-81B9-4EE2-80D2-C3A152EC25DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5960B623-81B9-4EE2-80D2-C3A152EC25DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5960B623-81B9-4EE2-80D2-C3A152EC25DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73714097-09A5-43A0-AEA2-31A7E55C8BC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73714097-09A5-43A0-AEA2-31A7E55C8BC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73714097-09A5-43A0-AEA2-31A7E55C8BC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73714097-09A5-43A0-AEA2-31A7E55C8BC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
