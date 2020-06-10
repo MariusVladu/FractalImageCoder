@@ -193,6 +193,7 @@
             this.decodedImagePanel.Name = "decodedImagePanel";
             this.decodedImagePanel.Size = new System.Drawing.Size(512, 512);
             this.decodedImagePanel.TabIndex = 1;
+            this.decodedImagePanel.MouseClick += new System.Windows.Forms.MouseEventHandler(this.decodedImagePanel_MouseClick);
             // 
             // loadEncodedButton
             // 
@@ -255,7 +256,7 @@
             this.decodeButton.TabIndex = 15;
             this.decodeButton.Text = "Decode";
             this.decodeButton.UseVisualStyleBackColor = true;
-            this.decodeButton.Click += new System.EventHandler(this.button1_Click);
+            this.decodeButton.Click += new System.EventHandler(this.decodeButton_Click);
             // 
             // savedDecodedButton
             // 
@@ -266,11 +267,12 @@
             this.savedDecodedButton.TabIndex = 16;
             this.savedDecodedButton.Text = "Save";
             this.savedDecodedButton.UseVisualStyleBackColor = true;
+            this.savedDecodedButton.Click += new System.EventHandler(this.savedDecodedButton_Click);
             // 
             // PSNRLabel
             // 
             this.PSNRLabel.AutoSize = true;
-            this.PSNRLabel.Location = new System.Drawing.Point(1023, 741);
+            this.PSNRLabel.Location = new System.Drawing.Point(585, 569);
             this.PSNRLabel.Name = "PSNRLabel";
             this.PSNRLabel.Size = new System.Drawing.Size(49, 13);
             this.PSNRLabel.TabIndex = 17;

@@ -90,6 +90,14 @@ namespace FractalImageCoder
             return computedMatrix;
         }
 
+        public MatchingBlocks GetMatchingBlock(int i, int j)
+        {
+            var startX = i / 8 * 8;
+            var startY = j / 8 * 8;
+
+            return matchingBlocks.FirstOrDefault(x => x.Range.StartX == startX && x.Range.StartY == startY);
+        }
+
         private int NormalizeValue(double value)
         {
             if (value < 0)

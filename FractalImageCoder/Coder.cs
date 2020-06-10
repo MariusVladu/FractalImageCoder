@@ -22,7 +22,6 @@ namespace FractalImageCoder
 
         public void CodeToFile(string inputFilePath, string outputFilePath, Action<int> onProgress)
         {
-            string fullString = "";
             InitializeImageMatrix(new Bitmap(inputFilePath));
             InitializeOutputFile(inputFilePath, outputFilePath);
 

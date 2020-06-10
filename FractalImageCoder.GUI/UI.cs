@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FractalImageCoder.Entities;
+using FractalImageCoder.Mappers;
+using System;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -11,8 +13,12 @@ namespace FractalImageCoder.GUI
         private Bitmap originalBitmap;
 
         private string fractalEncodedImagePath;
+        private string initialImageForDecodingPath;
+        private Bitmap initialBitmapForDecoding;
+        private Bitmap decodedBitmap;
 
-        private Graphics graphics;
+        private Graphics originalPanelGraphics;
+        private Graphics decodedPanelGraphics;
         private Pen pen = new Pen(Color.White);
 
         private Coder coder = new Coder();
@@ -22,7 +28,8 @@ namespace FractalImageCoder.GUI
         {
             InitializeComponent();
 
-            graphics = originalImagePanel.CreateGraphics();
+            originalPanelGraphics = originalImagePanel.CreateGraphics();
+            decodedPanelGraphics = decodedImagePanel.CreateGraphics();
         }
 
         private void loadButton_Click(object sender, EventArgs e)
@@ -45,14 +52,19 @@ namespace FractalImageCoder.GUI
             var x = e.Location.X;
             var y = e.Location.Y;
 
-            var matchingBlocks = await Task.Run(() => coder.GetBestMatchingDomainBlock(x, y, originalBitmap));
+            var matchingBlock = await Task.Run(() => coder.GetBestMatchingDomainBlock(x, y, originalBitmap));
 
-            var dequantizedScale = RangeDomainRelation.DequantizeScale((int)matchingBlocks.Scale);
-            var dequantizedOffset = RangeDomainRelation.DequantizeOffset((int)matchingBlocks.Offset, dequantizedScale);
+            ShowMatchingBlocks(matchingBlock, coder.imageMatrix, originalPanelGraphics);
+        }
 
-            xDLabel.Text = "Xd = " + matchingBlocks.Domain.StartX;
-            yDLabel.Text = "Yd = " + matchingBlocks.Domain.StartY;
-            isometryLabel.Text = "Isometry = " + matchingBlocks.Isometry;
+        private void ShowMatchingBlocks(MatchingBlocks matchingBlock, int[,] imageMatrix, Graphics panelGraphics)
+        {
+            var dequantizedScale = RangeDomainRelation.DequantizeScale((int)matchingBlock.Scale);
+            var dequantizedOffset = RangeDomainRelation.DequantizeOffset((int)matchingBlock.Offset, dequantizedScale);
+
+            xDLabel.Text = "Xd = " + matchingBlock.Domain.StartX;
+            yDLabel.Text = "Yd = " + matchingBlock.Domain.StartY;
+            isometryLabel.Text = "Isometry = " + matchingBlock.Isometry;
             scaleLabel.Text = "Scale = " + Math.Round(dequantizedScale, 2);
             offsetLabel.Text = "Offset = " + Math.Round(dequantizedOffset, 2);
 
@@ -63,7 +75,7 @@ namespace FractalImageCoder.GUI
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    var intensity = coder.imageMatrix[matchingBlocks.Range.StartX + i, matchingBlocks.Range.StartY + j];
+                    var intensity = imageMatrix[matchingBlock.Range.StartX + i, matchingBlock.Range.StartY + j];
                     for (int t = 0; t < 10; t++)
                     {
                         for (int v = 0; v < 10; v++)
@@ -78,7 +90,7 @@ namespace FractalImageCoder.GUI
             {
                 for (int j = 0; j < 16; j++)
                 {
-                    var intensity = coder.imageMatrix[matchingBlocks.Domain.StartX + i, matchingBlocks.Domain.StartY + j];
+                    var intensity = imageMatrix[matchingBlock.Domain.StartX + i, matchingBlock.Domain.StartY + j];
                     for (int t = 0; t < 10; t++)
                     {
                         for (int v = 0; v < 10; v++)
@@ -93,14 +105,19 @@ namespace FractalImageCoder.GUI
             domainBlockPanel.BackgroundImage = domainImage;
 
             originalImagePanel.Refresh();
+            decodedImagePanel.Refresh();
 
-            graphics.DrawRectangle(pen, matchingBlocks.Range.StartX, matchingBlocks.Range.StartY, 8, 8);
-            graphics.DrawRectangle(pen, matchingBlocks.Domain.StartX, matchingBlocks.Domain.StartY, 16, 16);
+            panelGraphics.DrawRectangle(pen, matchingBlock.Range.StartX, matchingBlock.Range.StartY, 8, 8);
+            panelGraphics.DrawRectangle(pen, matchingBlock.Domain.StartX, matchingBlock.Domain.StartY, 16, 16);
         }
 
         private async void saveButton_Click(object sender, EventArgs e)
         {
+            originalImagePanel.Enabled = false;
+
             await Task.Run(() => coder.CodeToFile(originalImagePath, $"{originalImagePath}.f", UpdateProgressBar));
+
+            originalImagePanel.Enabled = true;
         }
 
         private void UpdateProgressBar(int value)
@@ -122,7 +139,6 @@ namespace FractalImageCoder.GUI
 
             loadInitialButton.Enabled = true;
             decodeButton.Enabled = true;
-            savedDecodedButton.Enabled = true;
         }
 
         private void loadInitialButton_Click(object sender, EventArgs e)
@@ -132,15 +148,15 @@ namespace FractalImageCoder.GUI
             if (fileDialog.ShowDialog() != DialogResult.OK)
                 return;
 
-            originalImagePath = fileDialog.FileName;
-            originalBitmap = new Bitmap(originalImagePath);
+            initialImageForDecodingPath = fileDialog.FileName;
+            initialBitmapForDecoding = new Bitmap(initialImageForDecodingPath);
 
-            this.originalImagePanel.BackgroundImage = originalBitmap;
+            this.decodedImagePanel.BackgroundImage = initialBitmapForDecoding;
 
-            decoder = new Decoder(fractalEncodedImagePath, originalImagePath);
+            decoder = new Decoder(fractalEncodedImagePath, initialImageForDecodingPath);
         }
 
-        private async void button1_Click(object sender, EventArgs e)
+        private async void decodeButton_Click(object sender, EventArgs e)
         {
             await Task.Run(() =>
             {
@@ -149,24 +165,72 @@ namespace FractalImageCoder.GUI
                     DecodeImageOneStep();
                 }
             });
+
+            savedDecodedButton.Enabled = true;
         }
 
         private void DecodeImageOneStep()
         {
             var decodedImageMatrix = decoder.Decode(UpdateProgressBar);
-            var decodedImage = new Bitmap(decoder.width, decoder.height);
+            decodedBitmap = ImageMapper.GetImageFromPixelMatrix(decodedImageMatrix);
 
-            for (int i = 0; i < decodedImage.Height; i++)
+            decodedImagePanel.BackgroundImage = decodedBitmap;
+            ComputePSNR();
+        }
+
+        private void ComputePSNR()
+        {
+            if (string.IsNullOrWhiteSpace(originalImagePath) || decodedBitmap == null)
+                return;
+
+            var originalMatrix = ImageMapper.GetPixelMatrixFromImage(originalBitmap);
+            var decodedMatrix = ImageMapper.GetPixelMatrixFromImage(decodedBitmap);
+
+            var maxOriginalValue = -1;
+            long differencesSquared = 0;
+
+            for (int i = 0; i < originalBitmap.Height; i++)
             {
-                for (int j = 0; j < decodedImage.Width; j++)
+                for (int j = 0; j < originalBitmap.Width; j++)
                 {
-                    var intensity = decodedImageMatrix[i, j];
+                    var originalValue = originalMatrix[i, j];
+                    var decodedValue = decodedMatrix[i, j];
 
-                    decodedImage.SetPixel(i, j, Color.FromArgb(intensity, intensity, intensity));
+                    if (originalValue > maxOriginalValue)
+                        maxOriginalValue = originalValue;
+
+                    differencesSquared += (originalValue - decodedValue) * (originalValue - decodedValue);
                 }
             }
 
-            decodedImagePanel.BackgroundImage = decodedImage;
+            var psnr = 10 * Math.Log10((255 * 255) / ((double)differencesSquared / (originalBitmap.Width * originalBitmap.Height)));
+
+            UpdatePSNRLabel(psnr);
+        }
+
+        private void UpdatePSNRLabel(double psnr)
+        {
+            PSNRLabel.BeginInvoke((MethodInvoker)delegate ()
+            {
+                PSNRLabel.Text = "PSNR = " + string.Format("{0:0.0000}", psnr);
+            });
+        }
+
+        private void savedDecodedButton_Click(object sender, EventArgs e)
+        {
+            ImageSaver.SaveBitmapToFile(fractalEncodedImagePath, decodedBitmap, $"{fractalEncodedImagePath}.bmp");
+        }
+
+        private void decodedImagePanel_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (decodedBitmap == null && decoder != null) return;
+
+            var x = e.Location.X;
+            var y = e.Location.Y;
+
+            var matchingBlock = decoder.GetMatchingBlock(x, y);
+
+            ShowMatchingBlocks(matchingBlock, decoder.matrix, decodedPanelGraphics);
         }
     }
 }

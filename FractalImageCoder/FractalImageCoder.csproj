@@ -49,7 +49,9 @@
     <Compile Include="Decoder.cs" />
     <Compile Include="Entities\Block.cs" />
     <Compile Include="Entities\MatchingBlocks.cs" />
+    <Compile Include="ImageSaver.cs" />
     <Compile Include="Isometries.cs" />
+    <Compile Include="Mappers\ImageMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RangeDomainRelation.cs" />
   </ItemGroup>
