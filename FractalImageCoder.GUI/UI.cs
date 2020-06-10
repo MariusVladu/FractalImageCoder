@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FractalImageCoder.GUI
@@ -37,12 +38,14 @@ namespace FractalImageCoder.GUI
             this.originalImagePanel.BackgroundImage = originalBitmap;
         }
 
-        private void originalImagePanel_MouseClick(object sender, MouseEventArgs e)
+        private async void originalImagePanel_MouseClick(object sender, MouseEventArgs e)
         {
-            var x1 = e.Location.X;
-            var y1 = e.Location.Y;
+            if (originalBitmap == null) return;
 
-            var matchingBlocks = coder.GetBestMatchingDomainBlock(x1, y1, originalBitmap);
+            var x = e.Location.X;
+            var y = e.Location.Y;
+
+            var matchingBlocks = await Task.Run(() => coder.GetBestMatchingDomainBlock(x, y, originalBitmap));
 
             var dequantizedScale = RangeDomainRelation.DequantizeScale((int)matchingBlocks.Scale);
             var dequantizedOffset = RangeDomainRelation.DequantizeOffset((int)matchingBlocks.Offset, dequantizedScale);
@@ -95,14 +98,17 @@ namespace FractalImageCoder.GUI
             graphics.DrawRectangle(pen, matchingBlocks.Domain.StartX, matchingBlocks.Domain.StartY, 16, 16);
         }
 
-        private void saveButton_Click(object sender, EventArgs e)
+        private async void saveButton_Click(object sender, EventArgs e)
         {
-            coder.CodeToFile(originalImagePath, $"{originalImagePath}.f", UpdateProgressBar);
+            await Task.Run(() => coder.CodeToFile(originalImagePath, $"{originalImagePath}.f", UpdateProgressBar));
         }
 
         private void UpdateProgressBar(int value)
         {
-            progressBar.Value = value;
+            progressBar.BeginInvoke((MethodInvoker)delegate ()
+            {
+                progressBar.Value = value;
+            });
         }
 
         private void loadEncodedButton_Click(object sender, EventArgs e)
@@ -134,12 +140,15 @@ namespace FractalImageCoder.GUI
             decoder = new Decoder(fractalEncodedImagePath, originalImagePath);
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < steps.Value; i++)
+            await Task.Run(() =>
             {
-                DecodeImageOneStep();
-            }
+                for (int i = 0; i < steps.Value; i++)
+                {
+                    DecodeImageOneStep();
+                }
+            });
         }
 
         private void DecodeImageOneStep()
@@ -158,7 +167,6 @@ namespace FractalImageCoder.GUI
             }
 
             decodedImagePanel.BackgroundImage = decodedImage;
-            this.Refresh();
         }
     }
 }

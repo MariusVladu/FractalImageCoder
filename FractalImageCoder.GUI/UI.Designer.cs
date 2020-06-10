@@ -183,7 +183,7 @@
             this.progressBar.Location = new System.Drawing.Point(12, 530);
             this.progressBar.Maximum = 4096;
             this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(512, 23);
+            this.progressBar.Size = new System.Drawing.Size(1088, 23);
             this.progressBar.TabIndex = 11;
             // 
             // decodedImagePanel
@@ -280,7 +280,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1283, 809);
+            this.ClientSize = new System.Drawing.Size(1114, 768);
             this.Controls.Add(this.PSNRLabel);
             this.Controls.Add(this.savedDecodedButton);
             this.Controls.Add(this.decodeButton);

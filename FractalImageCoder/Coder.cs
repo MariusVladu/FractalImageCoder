@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FractalImageCoder
 {
@@ -28,7 +31,9 @@ namespace FractalImageCoder
 
             var processedRanges = 0;
 
-            foreach (var range in ranges)
+            var results = new MatchingBlocks[ranges.Count];
+
+            Parallel.ForEach(ranges, (range, state, index) =>
             {
                 Block bestDomain = null;
                 int bestIsometry = 0;
@@ -55,13 +60,26 @@ namespace FractalImageCoder
                     }
                 }
 
-                fullString += $"{bestDomain.StartX} {bestDomain.StartY} {bestIsometry} {bestScale} {bestOffset};";
-                WriteBestDomainMatchParameters(bestDomain, bestIsometry, bestScale, bestOffset);
+                results[index] = new MatchingBlocks
+                {
+                    Range = range,
+                    Domain = bestDomain,
+                    Isometry = bestIsometry,
+                    Scale = bestScale,
+                    Offset = bestOffset
+                };
 
-                onProgress(++processedRanges);
+                Interlocked.Increment(ref processedRanges);
+                onProgress(processedRanges);
+            });
+
+            var oderedResults = results.OrderBy(x => x.Range.StartX).ThenBy(x => x.Range.StartY);
+            foreach (var matchingBlock in oderedResults)
+            {
+                WriteBestDomainMatchParameters(matchingBlock.Domain, matchingBlock.Isometry, (int)matchingBlock.Scale, (int)matchingBlock.Offset);
             }
 
-            File.WriteAllText("stringOutput.txt", fullString);
+            bitWriter.Dispose();
         }
 
         public MatchingBlocks GetBestMatchingDomainBlock(int x, int y, Bitmap image)
