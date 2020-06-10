@@ -24,6 +24,9 @@ namespace FractalImageCoder.GUI
         private Coder coder = new Coder();
         private Decoder decoder;
 
+        private bool isDecoding = false;
+        private bool isEncoding = false;
+
         public UI()
         {
             InitializeComponent();
@@ -47,14 +50,17 @@ namespace FractalImageCoder.GUI
 
         private async void originalImagePanel_MouseClick(object sender, MouseEventArgs e)
         {
-            if (originalBitmap == null) return;
+            if (originalBitmap == null || isEncoding || isDecoding) return;
+            isEncoding = true;
 
             var x = e.Location.X;
             var y = e.Location.Y;
 
             var matchingBlock = await Task.Run(() => coder.GetBestMatchingDomainBlock(x, y, originalBitmap));
 
+            originalImagePanel.Refresh();
             ShowMatchingBlocks(matchingBlock, coder.imageMatrix, originalPanelGraphics);
+            isEncoding = false;
         }
 
         private void ShowMatchingBlocks(MatchingBlocks matchingBlock, int[,] imageMatrix, Graphics panelGraphics)
@@ -104,20 +110,20 @@ namespace FractalImageCoder.GUI
             rangeBlockPanel.BackgroundImage = rangeImage;
             domainBlockPanel.BackgroundImage = domainImage;
 
-            originalImagePanel.Refresh();
-            decodedImagePanel.Refresh();
-
             panelGraphics.DrawRectangle(pen, matchingBlock.Range.StartX, matchingBlock.Range.StartY, 8, 8);
             panelGraphics.DrawRectangle(pen, matchingBlock.Domain.StartX, matchingBlock.Domain.StartY, 16, 16);
         }
 
         private async void saveButton_Click(object sender, EventArgs e)
         {
+            if (isEncoding || isDecoding) return;
+            isEncoding = true;
             originalImagePanel.Enabled = false;
 
             await Task.Run(() => coder.CodeToFile(originalImagePath, $"{originalImagePath}.f", UpdateProgressBar));
 
             originalImagePanel.Enabled = true;
+            isEncoding = false;
         }
 
         private void UpdateProgressBar(int value)
@@ -158,6 +164,9 @@ namespace FractalImageCoder.GUI
 
         private async void decodeButton_Click(object sender, EventArgs e)
         {
+            if (isDecoding) return;
+            isDecoding = true;
+
             await Task.Run(() =>
             {
                 for (int i = 0; i < steps.Value; i++)
@@ -165,6 +174,8 @@ namespace FractalImageCoder.GUI
                     DecodeImageOneStep();
                 }
             });
+
+            isDecoding = false;
 
             savedDecodedButton.Enabled = true;
         }
@@ -218,19 +229,23 @@ namespace FractalImageCoder.GUI
 
         private void savedDecodedButton_Click(object sender, EventArgs e)
         {
+            if (isEncoding || isDecoding) return;
             ImageSaver.SaveBitmapToFile(fractalEncodedImagePath, decodedBitmap, $"{fractalEncodedImagePath}.bmp");
         }
 
         private void decodedImagePanel_MouseClick(object sender, MouseEventArgs e)
         {
-            if (decodedBitmap == null && decoder != null) return;
+            if (decodedBitmap == null || decoder == null || isDecoding) return;
+            isDecoding = true;
 
             var x = e.Location.X;
             var y = e.Location.Y;
 
             var matchingBlock = decoder.GetMatchingBlock(x, y);
 
+            decodedImagePanel.Refresh();
             ShowMatchingBlocks(matchingBlock, decoder.matrix, decodedPanelGraphics);
+            isDecoding = false;
         }
     }
 }
