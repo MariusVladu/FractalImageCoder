@@ -193,12 +193,15 @@ namespace FractalImageCoder
                     int x = i * 8;
                     int y = j * 8;
 
+                    var blockPixels = new int[8, 8];
+
                     for (int t = 0; t < 16; t += 2)
                         for (int v = 0; v < 16; v += 2)
                         {
                             var downsampledValue = (imageMatrix[x + t, y + v] + imageMatrix[x + t, y + v + 1] + imageMatrix[x + t + 1, y + v] + imageMatrix[x + t + 1, y + v + 1]) / 4;
                             sum += downsampledValue;
                             sumOfSquares += downsampledValue * downsampledValue;
+                            blockPixels[t / 2, v / 2] = downsampledValue;
                         }
 
                     domains.Add(new Block
@@ -207,7 +210,8 @@ namespace FractalImageCoder
                         StartX = x,
                         StartY = y,
                         Sum = sum,
-                        SumOfSquares = sumOfSquares
+                        SumOfSquares = sumOfSquares,
+                        BlockPixels = blockPixels
                     });
                 }
 

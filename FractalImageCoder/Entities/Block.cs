@@ -8,5 +8,6 @@
 
         public int Sum { get; set; }
         public int SumOfSquares { get; set; }
+        public int[,] BlockPixels { get; set; }
     }
 }

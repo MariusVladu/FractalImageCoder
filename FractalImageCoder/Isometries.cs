@@ -13,7 +13,9 @@ namespace FractalImageCoder
             for (int i = 0; i < range.Size; i++)
                 for (int j = 0; j < range.Size; j++)
                 {
-                    rdSum += GetDomainValue(i, j, isometryIndex, domain, imageMatrix) * imageMatrix[range.StartX + i, range.StartY + j];
+                    ComputeBlockCoordinatesByIsometry(i, j, isometryIndex, out var blockComputedI, out var blockComputedJ);
+
+                    rdSum += domain.BlockPixels[blockComputedI, blockComputedJ] * imageMatrix[range.StartX + i, range.StartY + j];
                 }
 
             return rdSum;
